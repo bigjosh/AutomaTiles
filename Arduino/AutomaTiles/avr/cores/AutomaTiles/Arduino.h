@@ -133,7 +133,10 @@ int atexit(void (*func)()) __attribute__((weak));
 typedef void (*cb_func)(void);
 
 void tileSetup(void);
+
 void getNeighborStates(uint8_t * result);
+uint8_t getNeighbor(uint8_t neighbor);
+
 void sendStep(void);
 uint32_t getTimer(void);
 void setColor(const uint8_t color[3]);

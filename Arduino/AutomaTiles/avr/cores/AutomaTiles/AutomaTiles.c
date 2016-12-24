@@ -103,6 +103,15 @@ void getNeighborStates(uint8_t * result){
 	if(interrupts)sei();//Re-enable interrupts
 }
 
+/*
+ * Get a single neighbor state using a tile side neigbor id.  
+ */
+uint8_t getNeighbor(uint8_t neighbor){
+	uint8_t neighbors[TILE_SIDES];
+	getNeighborStates(neighbors);
+	return neighbors[neighbor];
+}
+
 uint32_t getTimer(){
 	uint8_t interrupts = SREG&1<<7;
 
