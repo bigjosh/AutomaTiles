@@ -5,7 +5,6 @@
  *  Author: Joshua
  */
 
-#include <stdint.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/cpufunc.h>
@@ -110,6 +109,20 @@ uint8_t getNeighbor(uint8_t neighbor){
 	uint8_t neighbors[TILE_SIDES];
 	getNeighborStates(neighbors);
 	return neighbors[neighbor];
+}
+
+bool isAlone(void){
+	uint8_t neighbors[TILE_SIDES];
+	bool alone = true;
+	getNeighborStates(neighbors);
+	uint8_t i;
+	for(i=0; i<TILE_SIDES; i++){
+		if (neighbors[TILE_SIDES]){
+			alone = false;
+			break;
+		}
+	}
+	return alone;	
 }
 
 uint32_t getTimer(){

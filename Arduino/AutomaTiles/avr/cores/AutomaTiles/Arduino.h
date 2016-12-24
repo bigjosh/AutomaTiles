@@ -136,6 +136,7 @@ void tileSetup(void);
 
 void getNeighborStates(uint8_t * result);
 uint8_t getNeighbor(uint8_t neighbor);
+bool isAlone(void);
 
 void sendStep(void);
 uint32_t getTimer(void);

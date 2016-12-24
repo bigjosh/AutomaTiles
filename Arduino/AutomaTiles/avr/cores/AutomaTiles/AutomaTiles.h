@@ -9,6 +9,7 @@
 #ifndef AUTOMATILES_H_
 #define AUTOMATILES_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define TILE_SIDES	6
@@ -19,6 +20,7 @@ void tileSetup(void);
 
 void getNeighborStates(uint8_t * result);
 uint8_t getNeighbor(uint8_t neighbor);
+bool isAlone(void);
 
 void sendStep(void);
 uint32_t getTimer(void);
