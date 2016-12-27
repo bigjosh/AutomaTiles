@@ -14,7 +14,7 @@
  *  by Jonathan Bobrow
  *  04.2016
  */
-#include "color.h"
+// #include "color.h"
 
 // colors arranged to travel the farthest in transition between colors
 uint8_t colors[7][3] = {{204,0,0},        // Red

@@ -135,12 +135,19 @@ typedef void (*cb_func)(void);
 void tileSetup(void);
 
 void getNeighborStates(uint8_t * result);
-uint8_t getNeighbor(uint8_t neighbor);
+uint8_t getNeighbor(const uint8_t neighbor);
 bool isAlone(void);
 
 void sendStep(void);
 uint32_t getTimer(void);
+
 void setColor(const uint8_t color[3]);
+void setColorRGB(const uint8_t r, const uint8_t g, const uint8_t b);
+
+void fadeToRGB(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t ms);
+//void fadeToColor(const Color c, uint8_t ms);
+//void fadeToColorAndReturn(const Color c, uint8_t ms);
+
 void setState(uint8_t state);
 uint8_t getState(void);
 void setStepCallback(cb_func cb);

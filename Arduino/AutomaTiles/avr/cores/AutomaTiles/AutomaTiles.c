@@ -13,6 +13,7 @@
 #include "Pins.h"
 #include "Inits.h"
 #include "AutomaTiles.h"
+#include "color.h"
 
 volatile int16_t holdoff = 2000;//for temporarily preventing click outputs
 volatile static uint8_t click = 0;//becomes non-zero when a click is detected
@@ -105,7 +106,7 @@ void getNeighborStates(uint8_t * result){
 /*
  * Get a single neighbor state using a tile side neigbor id.  
  */
-uint8_t getNeighbor(uint8_t neighbor){
+uint8_t getNeighbor(const uint8_t neighbor){
 	uint8_t neighbors[TILE_SIDES];
 	getNeighborStates(neighbors);
 	return neighbors[neighbor];
@@ -118,7 +119,7 @@ bool isAlone(void){
 	uint8_t i;
 	for(i=0; i<TILE_SIDES; i++){
 		if (neighbors[TILE_SIDES]){
-			alone = false;
+			alone =  false;
 			break;
 		}
 	}
@@ -189,11 +190,29 @@ volatile uint16_t timerCBcount = 0;
 volatile uint16_t timerCBtime = UINT16_MAX;
 
 void setColor(const uint8_t color[3]){
-	outColor[0] = color[0];
-	outColor[1] = color[1];
-	outColor[2] = color[2];
+	setColorRGB(outColor[0], outColor[1], outColor[2]);
 }
 
+void setColorRGB(const uint8_t r, const uint8_t g, const uint8_t b){
+	outColor[0] = r;
+	outColor[1] = g;
+	outColor[2] = b;
+}
+
+/*
+ * Fade from current RGB color to RGB parameter, ms is the duration for the fade transition
+ *
+ */
+void fadeToRGB(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t ms){
+
+}
+
+/*void fadeToColor(const Color c, uint8_t ms){
+}
+
+void fadeToColorAndReturn(const Color c, uint8_t ms){
+}*/
+	
 void setStepCallback(cb_func cb){
 	clickCB = cb;
 }
