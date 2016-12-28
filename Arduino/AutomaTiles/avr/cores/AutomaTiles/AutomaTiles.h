@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 #define TILE_SIDES	6
+#define LED_REFRESHING_PERIOD  32  	// Led refreshing period is 32ms (check main.c)
 
 typedef void (*cb_func)(void);
 
@@ -29,16 +30,16 @@ void setColor(const uint8_t color[3]);
 void setColorRGB(const uint8_t r, const uint8_t g, const uint8_t b);
 
 void fadeTo(const uint8_t r, const uint8_t g, const uint8_t b, const uint16_t ms);
-//void fadeToColor(const Color c, uint8_t ms);
-//void fadeToColorAndReturn(const Color c, uint8_t ms);
+//void fadeTo(const Color c, uint8_t ms);
+//void fadeTo(const Color c, uint8_t ms);
 
-void blink(uint16_t ms);
+void blink(const uint16_t ms);
 //void blink(int ms, Color c); // defaults to on/off of this color
 //void blink(int ms, Color[n] c); // send array of colors to blink between
 //void blink(int ms, int min, int max); // low and high levels for blinking and the time between them
 //void blink(int ms, Color c, int min, int max); // low and high levels for blinking and the time between them
 
-void pulse(uint16_t ms); // phase
+void pulse(const uint16_t ms); // phase
 //void pulse(int ms, int min, int max); // phase w/ low and high brightness
 //void pulse(int ms, Colors[n] c); // phased pulse between colors (depends on fadeTo)
 

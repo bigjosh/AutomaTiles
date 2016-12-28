@@ -58,3 +58,22 @@ void sendColor(uint8_t clkPin, uint8_t datPin,const uint8_t color[3]){
 	sendByte(clkPin, datPin, color[1]);
 	sendByte(clkPin, datPin, color[0]);
 }
+
+//bit bangs an SPI signal to the specified pins that generates the specified color 
+//	formatted for the APA102, provided as a byte array of R,G,B and brightness 0..31
+void sendColorAndBrightness(uint8_t clkPin, uint8_t datPin,const uint8_t color[3], const uint8_t brightness) {
+	if(!portSet){
+		return;
+	}
+	//Start Frame
+	sendByte(clkPin, datPin, 0x00);
+	sendByte(clkPin, datPin, 0x00);
+	sendByte(clkPin, datPin, 0x00);
+	sendByte(clkPin, datPin, 0x00);
+	//Data
+	sendByte(clkPin, datPin, brightness & 0xE0);//Set brightness to current to minimum TODO: Add setBrightness function (0xE1...0xFF)
+	sendByte(clkPin, datPin, color[2]);
+	sendByte(clkPin, datPin, color[1]);
+	sendByte(clkPin, datPin, color[0]);
+}
+

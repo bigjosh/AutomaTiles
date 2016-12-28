@@ -13,6 +13,7 @@
 
 void setPort(volatile uint8_t* port);
 void sendColor(uint8_t clkPin, uint8_t datPin,const uint8_t color[3]);
+void sendColorAndBrightness(uint8_t clkPin, uint8_t datPin,const uint8_t color[3], const uint8_t brightness);
 volatile uint8_t* SPI_PORT;
 
 #endif /* APA102C_H_ */

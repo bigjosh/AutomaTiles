@@ -64,11 +64,26 @@ enum LEDMODE{
 };
 enum LEDMODE ledMode = stillMode;
 
+struct Fading {
+	hsv fromHSV;
+	hsv toHSV;
+	uint16_t hueIncrement;
+	bool positiveIncrement;
+} fading;
+
 struct Blinking {
 	bool status; // blink status OFF or ON
 	uint16_t period;
 	uint32_t next;	// Next time to switch blink status. current timer + period/2
 } blinking;
+
+struct Pulsing {
+	uint8_t min;
+	uint8_t max;
+	uint8_t brightness;  // Brightness value send to the LED
+	uint8_t increment;	// Brightness increments between LED refreshing cycles
+	bool rampUp;
+} pulsing;
 
 /* Uses the current state of the times ring buffer to determine the states of neighboring tiles
  * For each side, to have a non-zero state, a pulse must have been received in the last 100 ms and two of the
@@ -218,18 +233,34 @@ void setColorRGB(const uint8_t r, const uint8_t g, const uint8_t b){
  *
  */
 void fadeTo(const uint8_t r, const uint8_t g, const uint8_t b, const uint16_t ms){
-	/*
-	rgb fromRGB = {outColor[0], outColor[1], outColor[2]};
-	rgb toRGB = {r, g, b};
-	// Transform current and next color to HSV
-	hsv fromHSV = getHSVfromRGB(fromRGB);
-	hsv toHSV = getHSVfromRGB(toRGB);
+	ledMode = fadeMode;
 
+	uint8_t fromRGB[3] = {outColor[0], outColor[1], outColor[2]};
+	uint8_t toRGB[3] = {r, g, b};
+	// Transform current and next color to HSV
+	fading.fromHSV = getHSVfromRGB(fromRGB);
+	fading.toHSV = getHSVfromRGB(toRGB);
+
+	uint16_t ledUpdatesPerPeriod = ms/LED_REFRESHING_PERIOD;
 	// deciding Fade HUE direction (the shortest)
-	uint16_t hueDiff = (uint16_t) abs(fromHSV.h - toHSV.h);
-	// Hue increment per milisencond
-	uint16_t hueIncMs = hueDiff / ms;
-*/
+	fading.hueIncrement = (uint16_t) abs(fading.fromHSV.h - fading.toHSV.h) / ledUpdatesPerPeriod;
+
+	// Looking for the fastest route to reach the next Color
+	// if the increment is smaller than 180, that meeans that the shortest route is within a full circle (0 to 360 hue degrees)
+	// although if the increment is bigger than 180, that means that the shorter route will be over 360 or under 0 degrees
+	if (fading.hueIncrement < 180) {
+		if (fading.fromHSV.h < fading.toHSV.h) {
+			fading.positiveIncrement = true;
+		} else {
+			fading.positiveIncrement = false;
+		}
+	} else { // Hue increment per update period is bigger than 180
+		if (fading.fromHSV.h < fading.toHSV.h) {
+			fading.positiveIncrement = false;
+		} else {
+			fading.positiveIncrement = true;
+		}
+	}
 }
 
 /*void fadeToColor(const Color c, uint8_t ms){}
@@ -249,13 +280,46 @@ void colorTransitionsControl(void) {
 /*
  * This sets up a basic blink animation, ms is the blink period in ms
  */
-void blink(uint16_t ms){
+void blink(const uint16_t ms){
 	ledMode = blinkMode;
 	blinking.status = false;
 	blinking.period = ms;
 	blinking.next = ms + timer;
 }
 
+/*
+ * This sets up a basic pulse animation, ms is the blink period in ms
+ */
+void pulse(const uint16_t ms){
+	ledMode = pulseMode;
+	// Initializing pulsing variables, we are startramping up and from brightness = 0
+	pulsing.rampUp = true; 
+	pulsing.min = 0;
+	pulsing.max = 31; // 31 becuase we are using the 5 bits hardware brightness control from the APA102C
+	pulsing.brightness = 0;
+
+	uint16_t ledUpdatesPerPeriod = ms/LED_REFRESHING_PERIOD;  // This is how many times the LED will be refreshed by pulsing period
+	// Lets round up the ledUpdatePerPeriod if its a odd number
+	// We do this to make sure that there will be always a led output cycle to reach the pulsing.max value
+	// Note, we are rounding division, this means that the period will be a +- 32ms difference.
+	if(ledUpdatesPerPeriod%2) {
+		ledUpdatesPerPeriod++;
+	}
+	// A period contains a ramp up cycle and a ramp down cycle. That is why we dived by two
+	ledUpdatesPerPeriod >>= 1;
+	pulsing.increment = pulsing.max / ledUpdatesPerPeriod;
+
+	// Check max and mins of increment to avoid weird situation
+	if (pulsing.increment > pulsing.max) {
+		pulsing.increment = pulsing.max;
+	} else if (pulsing.increment < pulsing.min) {
+		pulsing.increment = pulsing.min;
+	}
+}
+
+/*
+ * This controls the led output mode and its logic
+ */
 void ledOutputControl(void){
 
 	switch(ledMode){	
@@ -263,6 +327,32 @@ void ledOutputControl(void){
 			sendColor(LEDCLK, LEDDAT,outColor);
 			break;
 		case fadeMode:
+			// HSV to RGB
+			getRGBfromHSV(outColor, fading.fromHSV);
+			sendColor(LEDCLK, LEDDAT, outColor);
+			// This detects if the updated fromHSV has passed the toHSV, hence we are done fading
+			// it has two conditions because for positive and negative (!positive) increments
+			bool fadeRunning = ((fading.fromHSV.h >= fading.toHSV.h) && fading.positiveIncrement) || 
+							   ((fading.fromHSV.h <= fading.toHSV.h) && !fading.positiveIncrement);
+			if (fadeRunning) {
+				if (fading.positiveIncrement) {
+					if ((fading.fromHSV.h + fading.hueIncrement) > 360)	{
+						// We are casting twice to avoid type conflicts with the color.h definitions
+						fading.fromHSV.h = (double)((uint16_t)(fading.fromHSV.h) % 360);
+					} else {
+						fading.fromHSV.h += fading.hueIncrement;
+					}
+				} else { // NegativeIncrement moving couterclockwise along the Hue wheel
+					if ((fading.fromHSV.h - fading.hueIncrement) < 0) {
+						fading.fromHSV.h = fading.fromHSV.h + 360 - fading.hueIncrement;
+					} else {
+						fading.fromHSV.h -= fading.hueIncrement;
+					}
+				} 
+			} else {  // End of the fade to transition, return to send colors
+				ledMode = stillMode;
+			}
+
 			break;
 		case blinkMode:
 			if ((blinking.next-timer) > blinking.period) {
@@ -271,17 +361,29 @@ void ledOutputControl(void){
 					blinking.status = false;
 				} else {  // Off to On
 					sendColor(LEDCLK, LEDDAT, outColor);
+
 					blinking.status = true;
 				}
-				blinking.next += blinking.period;
+				blinking.next += blinking.period;  // Updating the next blinking time incrementing it by the blinking period in ms
 			}
 			break;
 		case pulseMode:
+				sendColorAndBrightness(LEDCLK, LEDDAT, outColor, pulsing.brightness); // Senc Color and Brightness
+				// Update pulse logic control values (brightness and rampUp)
+				if (pulsing.rampUp) { // pulsing is ramping up
+					pulsing.brightness += pulsing.increment;  // Increase brightness for the next light update cycle (ledOutputControl () )
+					if (pulsing.brightness >= pulsing.max) {  // If brightness is bigger than the max value next cycle will start ramping down
+						pulsing.rampUp = false;
+					}
+				} else { // pulsing is ramping down
+					pulsing.brightness -= pulsing.increment;
+					if (pulsing.brightness <= pulsing.min) {
+						pulsing.rampUp = true;
+					}
+				}
 			break;
 	}
 }
-
-
 
 void setStepCallback(cb_func cb){
 	clickCB = cb;
