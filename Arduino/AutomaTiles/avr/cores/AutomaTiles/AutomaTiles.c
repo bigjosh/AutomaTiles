@@ -56,6 +56,20 @@ enum MODE
 };
 enum MODE mode = running;
 
+enum LEDMODE{
+	stillMode,
+	fadeMode,
+	blinkMode,  // avoiding 'blink' redeclaration
+	pulseMode
+};
+enum LEDMODE ledMode = stillMode;
+
+struct Blinking {
+	bool status; // blink status OFF or ON
+	uint16_t period;
+	uint32_t next;	// Next time to switch blink status. current timer + period/2
+} blinking;
+
 /* Uses the current state of the times ring buffer to determine the states of neighboring tiles
  * For each side, to have a non-zero state, a pulse must have been received in the last 100 ms and two of the
  * last three timing spaces must be equal.
@@ -203,16 +217,72 @@ void setColorRGB(const uint8_t r, const uint8_t g, const uint8_t b){
  * Fade from current RGB color to RGB parameter, ms is the duration for the fade transition
  *
  */
-void fadeToRGB(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t ms){
+void fadeTo(const uint8_t r, const uint8_t g, const uint8_t b, const uint16_t ms){
+	/*
+	rgb fromRGB = {outColor[0], outColor[1], outColor[2]};
+	rgb toRGB = {r, g, b};
+	// Transform current and next color to HSV
+	hsv fromHSV = getHSVfromRGB(fromRGB);
+	hsv toHSV = getHSVfromRGB(toRGB);
 
+	// deciding Fade HUE direction (the shortest)
+	uint16_t hueDiff = (uint16_t) abs(fromHSV.h - toHSV.h);
+	// Hue increment per milisencond
+	uint16_t hueIncMs = hueDiff / ms;
+*/
 }
 
-/*void fadeToColor(const Color c, uint8_t ms){
-}
+/*void fadeToColor(const Color c, uint8_t ms){}
+void fadeToColorAndReturn(const Color c, uint8_t ms){}*/
 
-void fadeToColorAndReturn(const Color c, uint8_t ms){
-}*/
+/*
+ *
+ */
+void colorTransitionsControl(void) {
 	
+/*	fromHSV.h += hueIncMs;
+	// Set current color RGB from incremented HSV
+	setColorRGB(getRGBfromHSV(outColor, fromHSV));
+	//sendColor()*/
+}
+
+/*
+ * This sets up a basic blink animation, ms is the blink period in ms
+ */
+void blink(uint16_t ms){
+	ledMode = blinkMode;
+	blinking.status = false;
+	blinking.period = ms;
+	blinking.next = ms + timer;
+}
+
+void ledOutputControl(void){
+
+	switch(ledMode){	
+		case stillMode:
+			sendColor(LEDCLK, LEDDAT,outColor);
+			break;
+		case fadeMode:
+			break;
+		case blinkMode:
+			if ((blinking.next-timer) > blinking.period) {
+				if (blinking.status) { // On to Off
+					sendColor(LEDCLK, LEDDAT, dark);
+					blinking.status = false;
+				} else {  // Off to On
+					sendColor(LEDCLK, LEDDAT, outColor);
+					blinking.status = true;
+				}
+				blinking.next += blinking.period;
+			}
+			break;
+		case pulseMode:
+			break;
+	}
+}
+
+
+
 void setStepCallback(cb_func cb){
 	clickCB = cb;
 }

@@ -25,7 +25,7 @@ int main(void) {
 			}
 			uint8_t t = timer%64;
 			if(t<=32 && t+diff>=32){
-				sendColor(LEDCLK, LEDDAT,outColor);
+				ledOutputControl();
 			}
 			timer = getTimer();
 			
