@@ -16,6 +16,8 @@
 #include "Inits.h"
 #include "APA102C.h"
 
+#include <avr/delay.h>
+
 volatile static int16_t holdoff = 2000;//for temporarily preventing click outputs
 volatile static uint8_t click = 0;//becomes non-zero when a click is detected
 volatile static uint8_t sync = 0;//becomes non-zero when synchronization pulses need to be sent out
@@ -99,6 +101,25 @@ static void parseBuffer();
 
 int main(void)
 {
+    
+    // TODO: Remove! Only for testing!
+
+    // Do nothing but blink the IR LEDs on and off!!!
+
+    DDRB|= _BV(PORTB2);         // Enable output connected to IR LEDs
+    
+    while (1) {
+        
+        PORTB |= _BV(PORTB2);
+        _delay_ms(100);
+        PORTB &= ~_BV(PORTB2);
+        _delay_ms(200);
+        
+    }
+    
+    // </remove>
+    
+    
 	//Initialization routines
 	initIO();
 	setPort(&PORTB);
@@ -114,6 +135,8 @@ int main(void)
 	}
 	
 	mode = running;
+    
+    
 	
     while(1)
 
