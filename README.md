@@ -1,5 +1,10 @@
 # AutomaTiles
 
+###FORK
+This bigjosh fork aims to improve the robustness of the IR communications using the same PCB by substituting some different parts and modifying the software.  
+
+###Overview
+
 Read [here](GamePlatform.md) to learn about how to think of AutomaTiles as a game platform
 
 AutomaTiles presents a new way to interact with cellular automata. In a physical form, each tile can be manipulated, and progresses based on an external metronome or user input. The same intimate knowledge a movie editor has with a film is shared with computation, as the user can control the speed at which the system evolves and handle individuals as they respond to input.
