@@ -38,6 +38,8 @@
 //Pushbutton pin
 #define BUTTON (1<<PB2)
 
+#define BUTTON_DOWN() (PINB&BUTTON)        // Non-inverted - gets tied to Vcc on press
+
 //Power control pin
 #define POWER (1<<PA6)
 

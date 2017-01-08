@@ -83,3 +83,7 @@ void sendColor( uint8_t dummy_clk, uint8_t dummy_dat, uint8_t color[3]) {
 	//Re-enable interrupts
 	sei();
 }
+
+void sendColorShort(  uint8_t color[3] ) {
+    sendColor( 0 , 0 , color);
+}

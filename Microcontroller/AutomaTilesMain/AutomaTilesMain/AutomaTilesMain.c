@@ -114,27 +114,184 @@ static void parseBuffer();
 
 /////// <Test mode code>
 
-volatile uint8_t  countdown=0; 
+// Search for a 2ms sqaure 
+// use pixel to indicate status
+// BLACK: No signal at all (below detection threshold)
+// GREEN: Receiving a good square
+// BLUE : Runt received (on shorter than 1ms)
+// RED  : Jumbo received (on longer than 1ms, probably saturated detector)
+
+// REMEBER: Phototransistors pull LOW when the see light
+
+#define MIN_WIDTH_US (1750U) 
+#define MAX_WIDTH_US (2250U)
+
+// Compare the time to a value
+#define TEST_TIMER_GT(us)  ( ((uint8_t) TIMER1_VAL) > ( ((uint8_t) us)/8U)  )       // macro because of all the unsigned casts
+
 
 void testMode(void) {
+
+    // wait for a low to sync on
+
+    /*    
+    _delay_us(200);
+    
+    if (TEST_TIMER_GT(1000)) {
+        sendColorShort(COLOR_GREEN);
+    } else {
+        sendColorShort(COLOR_RED);    
+    }
+    return;        
+    
+    */
+        
+    cli();
+    uint8_t mode=0;     // Mode is which LED we are looking at , or 0=transmit
+    uint8_t state=0;
+    
+    static uint8_t xmitonoff = 0;
+
     
     while (1) {
-    
-        irOn();
-    
-        TIMER1_CLR;
-    
-        while (TIMER1_VAL< (1500/8)); // 1.5ms on clock
-    
-        irOff();
-    
-    
-        TIMER1_CLR;
-    
-        while (TIMER1_VAL< (500/8));        // 0.5ms on clock
         
-    }    
+        if (BUTTON_DOWN()) {
+            
+            sendColorShort(COLOR_YELLOW);
+            
+            _delay_ms(50);  // Debounce
+            
+            while (BUTTON_DOWN());      // Wait for release
+            
+            sendColorShort(COLOR_BLACK);
+            _delay_ms(500);
+            
+            mode++;
+            
+            if (mode==7) {
+                
+                mode = 0;           // Back to xmit mode
+                xmitonoff = 1;      // Quick visual feedback....
+                //sendColorShort(COLOR_GREEN);        // Indicate (and give them a sec to let go of button)
+                //_delay_ms(1000);    
+                            
+            } else {
+                
+                // Note that we can't get here if theIR was on because it is shorted to the button in this design!
+                //irOff();      // Are we switching from xmis mode? Either to act than think. 
+                
+                // Indicate which LED we are watching
+                
+                for(uint8_t i=0; i< mode; i++ ) {
+                    sendColorShort(COLOR_BLUE);
+                    _delay_ms(500);
+                    sendColorShort(COLOR_BLACK);
+                    _delay_ms(500);
+                }
+                                
+            }
+            
+        }                                    
+            
+        if (mode==0) { // Xmit mode!
+                        
+            if (!xmitonoff) {                // This is hoops becase we can not detect a button push while ir is on becuase IR and Button are shortted on board
+                irOn();
+                sendColorShort(COLOR_GREEN);
+                _delay_ms(200);
+                irOff();                
+                sendColorShort(COLOR_BLACK);
+            } else {
+                _delay_ms(100);
+            }
+            
+            xmitonoff++;
+            
+            if (xmitonoff>=8) xmitonoff=0;
+            
+        } else {
+            
+            uint8_t photomask = 1<<(mode-1);
+            
+        
+            uint8_t newState = (PINA & photomask);            //1=SIGNAL, 0=Dark
+        
+            if (newState!=state) {
+                        
+                state=newState;
+            
+                if (state) {
+                    sendColorShort(COLOR_RED);
+                } else {
+                    sendColorShort(COLOR_BLACK);
+                }
+            
+                _delay_ms(100);         // Make brief states visible
+            
+            }
+        
+        
+        
+         }        
+     }     
+     /*
+
+        sendColorShort( COLOR_BLACK);     // Start with pixel off while we search
+                
+        // INitial pulse is special - We don't check if it is too short because we might have jumpped in in the middle...
+                   
+                   while (1)  {
+        TIMER1_CLR;
+        irOn();                       
+        while (!TEST_TIMER_GT(2000));
+        TIMER1_CLR;
+        irOff();        
+        while (!TEST_TIMER_GT(500));
+        
+                   }        
+        
+        while ((!(PINA & PHOTO4)) && !TEST_TIMER_GT(MAX_WIDTH_US) );     // While signal ON, but don't wait too long
     
+        if ( TEST_TIMER_GT(MAX_WIDTH_US) ) {            // ON too long
+            sendColorShort(COLOR_YELLOW);
+            return;
+        }
+        
+            sendColorShort(COLOR_BLUE);
+            
+            return;
+        
+        
+
+        // Ok, we are low now waiting for a pos edge - LED is black
+
+        while ( (PINA & PHOTO4) );       // Wait for an up edge (we can wait forever, we are black now
+
+        // Bingo! We have a pos edge - start the stopwatch!
+    
+        TIMER1_CLR;         
+        while ((!(PINA & PHOTO4)) && !TEST_TIMER_GT(MAX_WIDTH_US) );     // While signal ON, but don't wait too long
+    
+        if ( TEST_TIMER_GT(MAX_WIDTH_US) ) {            // ON too long
+            sendColorShort(COLOR_RED);
+            return;
+        }
+        
+        if ( !TEST_TIMER_GT( MIN_WIDTH_US) ) {          // On too short
+            sendColorShort(COLOR_BLUE);
+            return;        
+        }
+        
+        //Ok, pulse looks good - show fleeting aproval!
+        
+        sendColorShort(COLOR_GREEN);
+        
+        // Loop back and look for the next weel formed pulse!
+        
+        
+    }        
+    
+    */
     /*
     uint8_t runtflag=0;
     uint8_t jumboflag=0;
@@ -232,6 +389,8 @@ inline void irOff() {
 
 int main(void)
 {
+    
+    
     /*
     // TODO: Remove! Only for testing!    
     // Turn on power for the boost converter
@@ -272,140 +431,26 @@ int main(void)
 
     sendRGB(0,0,0);
         
-   // initTimer0();       // Establish 1ms interrupts on TIM0_COMPA_vect)   
+        // TODO: Why is this INTing even withough sei()? Is there one hitting someplace in a routine?
+    //initTimer0();       // Establish 1ms interrupts on TIM0_COMPA_vect)   
                         // Currently this also starts transmitting a 2ms square wave
                         
-    initTimer1();       // Start the timer we use for stopwatching the incoming pulses 
-   // sei();
+    //sei();              // Let the ISR actually execute
+                        
+                        
+    //initTimer1();       // Start the timer we use for stopwatching the incoming pulses 
 
     // BLUE on boot just we know if we get reset (maybe from under voltage or glitch)    
     
     
-    testMode();
-    
-    
-       
-    while (1) {        
-        
-        countdown=5;
-        
-        while( countdown && PINA & PHOTO4);
-        
-        if (countdown==4 || countdown==3) {
-            sendColor(0,255,0);
-        } else {
-            sendColor(0,0,255);            
-        }
-        
-        while( countdown && !(PINA & PHOTO4));
-
-        if (countdown==4 || countdown==3) {
-            sendColor(0,255,0);
-            } else {
-            sendColor(0,0,255);
-        }
-                
-    }
-    
-    //testMode();
-    
-    /* 
-    
-    // TX MODE
-    
     while (1) {
-    	        sendColor(LEDCLK,LEDDAT,COLOR_BLUE);
-              
-              _delay_ms(200);
-              
-              
-      	        sendColor(LEDCLK,LEDDAT,COLOR_);
-              
-              _delay_ms(200);
-              
-       }
+        testMode();
+        _delay_ms(300);     // Leave LED on long enough to see it...        
+        sendColorShort(COLOR_BLACK);
+        _delay_ms(300);     // Leave LED on long enough to see it...
+        
+    }        
        
-       */
-              
-    
-    // RX MODE
-    
-    uint8_t blinkcount=0;
-    uint8_t currentColor=COLOR_BLUE;
-    
-    while (1) {
-        
-        /*
-        
-        if (PINB & _BV(PB2)) {         // Button down?
-            
-    	    sendColor(LEDCLK,LEDDAT,COLOR_BLUE);
-          */
-        
-          
-        uint8_t red_flag=0;
-        uint8_t green_flag=0;
-            
-        for(uint16_t i=0; i<30000;i++) {
-
-            if (PINA &  PHOTO4 ) {             // Testing Q5
-    	        green_flag=1;
-            } else {                        
-	            red_flag=1;
-            }                
-                
-        }                
-                
-        if ( red_flag & green_flag ) {
-                
-            sendColor(LEDCLK,LEDDAT,COLOR_YELLOW);
-                
-        } else if (green_flag) {
-                
-            sendColor(LEDCLK,LEDDAT,COLOR_GREEN);
-                
-        } else {
-                
-            sendColor(LEDCLK,LEDDAT,COLOR_RED);
-
-        }
-            
-        if (blinkcount++ > 10) {           // Only blink the IR LED occasionally so we can see if we see it
-                
-            PORTB |= IR;            // Set port high first or else will will short if the button happens to be pressed!                
-                
-            DDRB |= IR;             // We always keep the IR control pin in input mode becuase it happens to be hardwired to the button so we never want to turn it on unessisarily. 
-                                    // TODO: Is the pull up good enough? I think so!
-
-            // This will only stay on until the next pass
-                
-            blinkcount=0;                
-                
-        } else {
-                
-            DDRB &= ~ IR;
-            PORTB &= ~ IR;
-                
-        }
-    }                  
-            
-            
-                
-                                                         
-	   //sendColor(LEDCLK,LEDDAT,COLOR_BLACK);
-        
-       // _delay_ms(100);
-        
-        /*
-	    sendColor(LEDCLK,LEDDAT,COLOR_GREEN);
-	    _delay_ms(400);
-	    sendColor(LEDCLK,LEDDAT,COLOR_YELLOW);
-	    _delay_ms(400);
-        
-        */
-        
-    
-    
 	sei();
 	//initAD();         // Not wanted now there is no mic
 	initTimer();
@@ -731,11 +776,14 @@ static void parseBuffer(){
 	}
 }
 
-uint8_t timerCount=0;
-
 //Timer interrupt occurs every 1 ms
 //Increments timer and controls IR LEDs to keep their timing consistent
+
+// Current code generates a 2ms square on IR LEDS as a test pattern
+
 ISR(TIM0_COMPA_vect){
+    
+    static uint8_t timerCount=0;
     
     timerCount++;
     
@@ -748,9 +796,11 @@ ISR(TIM0_COMPA_vect){
         case 3: break;        
     }
     
+    /*
     if (countdown) countdown--;
     
     return;
+    */
     
     //PINB |= 1;     // Flick the PB0 line to trigger scope
     //PINB |= 1;     // Flick the PB0 line to trigger scope
