@@ -11,8 +11,7 @@
 #ifndef APA102C_H_
 #define APA102C_H_
 
-void setPort(volatile uint8_t* port);
-void sendColor(uint8_t clkPin, uint8_t datPin,const uint8_t color[3]);
-volatile uint8_t* SPI_PORT;
+void sendColor( uint8_t dummy_clk, uint8_t dummy_dat, uint8_t color[3]);
+void sendRGB( uint8_t r, uint8_t g, uint8_t b  );
 
 #endif /* APA102C_H_ */

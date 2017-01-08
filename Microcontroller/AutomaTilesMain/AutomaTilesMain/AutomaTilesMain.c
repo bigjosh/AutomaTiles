@@ -45,21 +45,30 @@ volatile static uint8_t soundEn = 1; //if true, react to sound
 
 uint8_t colors[][3] = //index corresponds to state
 {
-	{0x55,0x00,0x00},
+	{0x55,0x00,0x00},       // RED=0
 	{0x00,0x55,0xAA},
-	{0x7F,0x7F,0x00},
+	{0x7F,0x7F,0x00},       // YELLOW=2
 	{0xAA,0x55,0x00},
 	{0xFF,0x00,0x00},
 	{0xAA,0x00,0x55},
 	{0x7F,0x00,0x7F},
 	{0x55,0x00,0xAA},
-	{0x00,0x00,0xFF},
-	{0x00,0x55,0xAA},
+	{0x00,0x00,0xFF},       // BLUE=8
+	{0x00,0x55,0xAA},      
 	{0x00,0x7F,0x7F},
 	{0x00,0xAA,0x55},		
-	{0x00,0xFF,0x00},
+	{0x00,0xFF,0x00},      // GREEN=12
 	{0x55,0xAA,0x00}
 };
+
+uint8_t color_black[] = {0,0,0};
+
+#define COLOR_RED (colors[0])
+#define COLOR_YELLOW (colors[2])
+#define COLOR_GREEN (colors[12])
+#define COLOR_BLUE (colors[8])
+
+#define COLOR_BLACK (color_black)
 
 const uint8_t CYCLE_TIME = 32;
 uint8_t cycleTimer = 0;
@@ -99,33 +108,306 @@ enum MODE
 static void getStates(uint8_t * result);
 static void parseBuffer();
 
-int main(void)
-{
-    
-    // TODO: Remove! Only for testing!
 
-    // Do nothing but blink the IR LEDs on and off!!!
 
-    DDRB|= _BV(PORTB2);         // Enable output connected to IR LEDs
+
+
+/////// <Test mode code>
+
+volatile uint8_t  countdown=0; 
+
+void testMode(void) {
     
     while (1) {
+    
+        irOn();
+    
+        TIMER1_CLR;
+    
+        while (TIMER1_VAL< (1500/8)); // 1.5ms on clock
+    
+        irOff();
+    
+    
+        TIMER1_CLR;
+    
+        while (TIMER1_VAL< (500/8));        // 0.5ms on clock
         
+    }    
+    
+    /*
+    uint8_t runtflag=0;
+    uint8_t jumboflag=0;
+    uint8_t goldieflag=0;
+   
+          
+    while (1) {
+        
+        
+        
+        while (countdown && !(PINA & PHOTO4));  // wait for some signal to get us started. No signal at all is no error, so shows as black. 
+        
+        if (!0)
+            
+                    sendRGB(0,0,0);                    
+                    // Let black go away quickly
+                }
+                
+            }                
+            
+        for( uint8_t i=0; i<3 ;i++) {       // take 3 samples at 500ms  intervals
+            
+            if (!PINA & PHOTO4)) {          // This should be high!
+                sendRGB(255,0,0);           // Indicate runt
+                currentColorCountdown=255
+            }
+            
+            
+        _delay_ms(1);           // This should put us square in the middle of the pulse 
+            
+        };       
+        
+        // Ok, if we get here then we have a signal detected        
+        // We don't know where in the timer cycle we are, but we know that a 2ms pulse must be sampled 2 frames in a row. 
+        
+        
+        
+        countdown=6;
+        
+        uint8_t pulseflag=0;
+        
+        while( countdown && PINA & PHOTO4) {
+            pulseflag=1;                            // Did we even see anything?
+        }            
+        
+        
+        if (!pulseflag) {       // We saw nothing at all 
+            sendRGB(0,0,0);     // Go black
+            
+        }
+        
+        switch (countdown) {
+            
+            case 6: 
+            case 5: sendRGB(255,0,0); break;        // Pulse too short or not at all 
+            
+            
+        }
+        
+        if (countdown==4 || countdown==3) {
+            sendColor(0,255,0);
+            } else {
+            sendColor(0,0,255);
+        }
+        
+        while( countdown && !(PINA & PHOTO4));
+
+        if (countdown==4 || countdown==3) {
+            sendColor(0,255,0);
+            } else {
+            sendColor(0,0,255);
+        }
+        
+    }
+    
+    */
+    
+}
+
+inline void irOn() {        
+    PORTB |= IR;            // Set port high first or else will will short if the button happens to be pressed! This will enable the pull-up which will just fight with the pull-down for 1us
+    DDRB |= IR;             // We always keep the IR control pin in input mode becuase it happens to be hardwired to the button so we never want to turn it on unessisarily.   
+}
+
+inline void irOff() {
+    DDRB &= ~ IR;
+    PORTB &= ~ IR;    
+}
+
+
+/////// </test mode code>
+
+//volatile uint8_t countdown=0; // USed to time bits. Updated in timer ISR
+
+
+int main(void)
+{
+    /*
+    // TODO: Remove! Only for testing!    
+    // Turn on power for the boost converter
+    
+    DDRA|= _BV(PORTA6);        
+    //PORTA |= _BV(PORTA6);      // Drive MOFSET gate high, turn off mosfet
+        
+     PORTA &= ~_BV(PORTA6);      // Drive MOFSET gate low, turn on mosfet (redunant, we can take this out since default state is low)
+
+
+    // Enable output connected to IR LEDs
+    
+    DDRB|= _BV(PORTB2);         
+
+    // Do nothing but blink the IR LEDs on and off!!!
+        
+    while (1) {
+                      
         PORTB |= _BV(PORTB2);
-        _delay_ms(100);
+        _delay_ms(500);
         PORTB &= ~_BV(PORTB2);
-        _delay_ms(200);
+        _delay_ms(500);
         
     }
     
     // </remove>
     
+    */
+    
     
 	//Initialization routines
 	initIO();
-	setPort(&PORTB);
-	sendColor(LEDCLK,LEDDAT,colors[0]);
+    
+    _delay_ms(100);     // Allow boost to warm up TODO: Is this unnecessary? How long?
+    sendColor(LEDCLK,LEDDAT,COLOR_BLUE);
+
+    _delay_ms(1000);
+
+    sendRGB(0,0,0);
+        
+   // initTimer0();       // Establish 1ms interrupts on TIM0_COMPA_vect)   
+                        // Currently this also starts transmitting a 2ms square wave
+                        
+    initTimer1();       // Start the timer we use for stopwatching the incoming pulses 
+   // sei();
+
+    // BLUE on boot just we know if we get reset (maybe from under voltage or glitch)    
+    
+    
+    testMode();
+    
+    
+       
+    while (1) {        
+        
+        countdown=5;
+        
+        while( countdown && PINA & PHOTO4);
+        
+        if (countdown==4 || countdown==3) {
+            sendColor(0,255,0);
+        } else {
+            sendColor(0,0,255);            
+        }
+        
+        while( countdown && !(PINA & PHOTO4));
+
+        if (countdown==4 || countdown==3) {
+            sendColor(0,255,0);
+            } else {
+            sendColor(0,0,255);
+        }
+                
+    }
+    
+    //testMode();
+    
+    /* 
+    
+    // TX MODE
+    
+    while (1) {
+    	        sendColor(LEDCLK,LEDDAT,COLOR_BLUE);
+              
+              _delay_ms(200);
+              
+              
+      	        sendColor(LEDCLK,LEDDAT,COLOR_);
+              
+              _delay_ms(200);
+              
+       }
+       
+       */
+              
+    
+    // RX MODE
+    
+    uint8_t blinkcount=0;
+    uint8_t currentColor=COLOR_BLUE;
+    
+    while (1) {
+        
+        /*
+        
+        if (PINB & _BV(PB2)) {         // Button down?
+            
+    	    sendColor(LEDCLK,LEDDAT,COLOR_BLUE);
+          */
+        
+          
+        uint8_t red_flag=0;
+        uint8_t green_flag=0;
+            
+        for(uint16_t i=0; i<30000;i++) {
+
+            if (PINA &  PHOTO4 ) {             // Testing Q5
+    	        green_flag=1;
+            } else {                        
+	            red_flag=1;
+            }                
+                
+        }                
+                
+        if ( red_flag & green_flag ) {
+                
+            sendColor(LEDCLK,LEDDAT,COLOR_YELLOW);
+                
+        } else if (green_flag) {
+                
+            sendColor(LEDCLK,LEDDAT,COLOR_GREEN);
+                
+        } else {
+                
+            sendColor(LEDCLK,LEDDAT,COLOR_RED);
+
+        }
+            
+        if (blinkcount++ > 10) {           // Only blink the IR LED occasionally so we can see if we see it
+                
+            PORTB |= IR;            // Set port high first or else will will short if the button happens to be pressed!                
+                
+            DDRB |= IR;             // We always keep the IR control pin in input mode becuase it happens to be hardwired to the button so we never want to turn it on unessisarily. 
+                                    // TODO: Is the pull up good enough? I think so!
+
+            // This will only stay on until the next pass
+                
+            blinkcount=0;                
+                
+        } else {
+                
+            DDRB &= ~ IR;
+            PORTB &= ~ IR;
+                
+        }
+    }                  
+            
+            
+                
+                                                         
+	   //sendColor(LEDCLK,LEDDAT,COLOR_BLACK);
+        
+       // _delay_ms(100);
+        
+        /*
+	    sendColor(LEDCLK,LEDDAT,COLOR_GREEN);
+	    _delay_ms(400);
+	    sendColor(LEDCLK,LEDDAT,COLOR_YELLOW);
+	    _delay_ms(400);
+        
+        */
+        
+    
+    
 	sei();
-	initAD();
+	//initAD();         // Not wanted now there is no mic
 	initTimer();
 	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	sleep_enable();
@@ -449,9 +731,33 @@ static void parseBuffer(){
 	}
 }
 
+uint8_t timerCount=0;
+
 //Timer interrupt occurs every 1 ms
 //Increments timer and controls IR LEDs to keep their timing consistent
 ISR(TIM0_COMPA_vect){
+    
+    timerCount++;
+    
+    if (timerCount==4) timerCount=0;
+        
+    switch( timerCount ) {
+        case 0: irOn(); break;
+        case 1: break;
+        case 2: irOff();
+        case 3: break;        
+    }
+    
+    if (countdown) countdown--;
+    
+    return;
+    
+    //PINB |= 1;     // Flick the PB0 line to trigger scope
+    //PINB |= 1;     // Flick the PB0 line to trigger scope
+    
+    return;
+    
+    
 	static uint8_t IRcount = 0;//Tracks cycles for accurate IR LED timing
 	static uint8_t sendState = 0;//State currently being sent. only updates on pulse to ensure accurate states are sent
 	timer++;
@@ -565,58 +871,4 @@ ISR(PCINT0_vect){
 		}
 	}
 	prevVals = vals;
-}
-
-//ADC conversion complete interrupt
-//Calculates a running median for zeroing out signal
-//Then calculates a running median of deltas from the median to check for exceptional events
-//If a delta is very high compared to the median, a click is detected and click is set to non-0
-ISR(ADC_vect){
-	//Values saved for derivative calculation
-	static uint16_t median = 1<<15;
-	static uint16_t medDelta = 1<<5;
-	
-	uint8_t adc;	
-	
-	adc = ADCH;// Record ADC value
-	sei(); //re-enable interrupts, allow this calculation to be interrupted
-	
-	//update running median. Error on high side.
-	//note that due to comparison, the median is scaled up by 2^8
-	if((adc<<8)<median){
-		median--;
-		}else{
-		median++;
-	}
-	uint16_t delta;
-	if(median > (adc<<8)){// Calculate delta
-		delta = (median>>8)-adc;
-		}else{
-		delta = adc-(median>>8);
-	}
-	
-	//Update running delta median. Error on high side.
-	//note that due to comparison, the median is scaled up by 2^4=16
-	if((delta<<4)<medDelta && medDelta > 10){ 
-		medDelta--;
-		}else{
-		medDelta++;
-	}
-	
-	if(holdoff<0){//edge case protection
-		holdoff = 0;
-	}
-	
-	if(holdoff == 0){//holdoff can be set elsewhere to disable click being set for a period of time
-		if(medDelta < delta){//check for click. as the median delta is scaled up by 16, an exceptional event is needed.
-			if(soundEn){
-				click = delta;//Board triggered click as soon as it could (double steps)
-				cli();
-				sleepTimer = timer;
-				sei();
-			}
-		}
-	}else{
-		holdoff--;
-	}
 }
