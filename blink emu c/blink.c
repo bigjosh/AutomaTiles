@@ -1,5 +1,3 @@
-/* Hello World program */
-
 #include<stdio.h>
 #include<stdint.h>
 #include<stdbool.h>
@@ -27,6 +25,8 @@ struct Fading {
 	uint16_t fadeCntr;
 	hsv inc;
 	bool positiveIncrement;
+	int16_t error;	// Bressenham algorithm error to enable up to 32768ms delays
+	uint16_t dh, dt;	// hue differential, time diferential
 } fading;
 
 struct Blinking {
@@ -66,10 +66,11 @@ void fadeTo(const uint8_t r, const uint8_t g, const uint8_t b, const uint16_t ms
 	printf("Fade from h = %d, s=%d, v= %d\n", wheelTo360(fading.currHSV.h), fading.currHSV.s, fading.currHSV.v);
 	printf("Fade to h = %d, s=%d, v= %d\n", wheelTo360(fading.toHSV.h), fading.toHSV.s, fading.toHSV.v);
 
-	fading.fadeCntr = ms/LED_REFRESHING_PERIOD; 
+	fading.dt = ms/LED_REFRESHING_PERIOD;
+	fading.fadeCntr = fading.dt;
 	printf("Led Updates Per Period = %d\n", fading.fadeCntr);
-	
-	uint8_t hueDiff = abs(fading.fromHSV.h - fading.toHSV.h);
+	fading.error = 0;
+	fading.dh = abs(fading.fromHSV.h - fading.toHSV.h);
 	uint8_t saturationDiff = abs(fading.fromHSV.s - fading.toHSV.s);
 	uint8_t valueDiff = abs(fading.fromHSV.v - fading.toHSV.v);
 	// deciding Fade HUE direction (the shortest)
@@ -81,7 +82,7 @@ void fadeTo(const uint8_t r, const uint8_t g, const uint8_t b, const uint16_t ms
 	// Looking for the fastest route to reach the next Color
 	// if the increment is smaller than 180, that meeans that the shortest route is within a full circle (0 to 360 hue degrees)
 	// although if the increment is bigger than 180, that means that the shorter route will be over 360 or under 0 degrees
-	if (hueDiff < wheel(180)) {
+	if (fading.dh < wheel(180)) {
 		if (fading.fromHSV.h < fading.toHSV.h) {
 			fading.positiveIncrement = true;
 		} else {
@@ -94,12 +95,13 @@ void fadeTo(const uint8_t r, const uint8_t g, const uint8_t b, const uint16_t ms
 			fading.positiveIncrement = true;
 		}
 		// adjust increment for transitions that overflow the wheel
-		hueDiff = wheel(360) - hueDiff;
+		fading.dh = wheel(360) - fading.dh;
 	}
-	fading.inc.h = hueDiff / fading.fadeCntr;
+	fading.inc.h = fading.dh / fading.fadeCntr;
 	fading.inc.s = saturationDiff / fading.fadeCntr;
 	fading.inc.v = valueDiff / fading.fadeCntr;
-	printf("Hue Diff = %d, SaturationDiff = %d, valueDiff = %d\n", wheelTo360(hueDiff), saturationDiff, valueDiff);	
+
+	printf("Hue Diff = %d, SaturationDiff = %d, valueDiff = %d\n", wheelTo360(fading.dh), saturationDiff, valueDiff);	
 	printf("Hue Increment = %d\n", wheelTo360(fading.inc.h));
 	printf("Positive increment? %d\n", fading.positiveIncrement);
 }
@@ -127,8 +129,14 @@ void fadeUpdate(void) {
 				// Discretization double to int correction
 				// This solves casting and rounding issues using uint8_t. Lightly inspired in Bressenham's algorithms
 				// We look at the current value using rounded increment, and compared to the same equivalent increment from our 
-				// target hue value, if smaller increment by 1 
-				if(fading.currHSV.h < (fading.toHSV.h - fading.fadeCntr * fading.inc.h)){
+				// target hue value, if smaller increment by 1
+				if (!fading.inc.h) { // Increment equal to 0
+				 	fading.error += 2*fading.dh;
+				 	if (fading.error > fading.dt)	{
+				 		fading.currHSV.h++;
+				 		fading.error-= 2* fading.dt;	
+				 	}
+				 } else if (fading.currHSV.h < (fading.toHSV.h - fading.fadeCntr * fading.inc.h)){
 					fading.currHSV.h++;
 				}
 			}
@@ -141,8 +149,14 @@ void fadeUpdate(void) {
 				fading.currHSV.h = fading.currHSV.h - fading.inc.h + wheel(360);
 			} else {
 				fading.currHSV.h -= fading.inc.h;
-				// Discretization double to int	correction			 	
-				if(fading.currHSV.h > ( (fading.toHSV.h + fading.fadeCntr * fading.inc.h) % wheel(360) ) ){
+				// Discretization double to int	correction
+				if (!fading.inc.h) { // Increment equal to 0
+				 	fading.error += 2*fading.dh;
+				 	if (fading.error > fading.dt)	{
+				 		fading.currHSV.h--;
+				 		fading.error-= 2* fading.dt;	
+				 	}		 	
+				} else if(fading.currHSV.h > ( (fading.toHSV.h + fading.fadeCntr * fading.inc.h) % wheel(360) ) ){
 					fading.currHSV.h--;
 				}
 			}

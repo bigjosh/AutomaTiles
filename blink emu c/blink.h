@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define BOOST_RESOLUTION_THRESHOLD	15
+
 // This are defined at Arduino.h
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
