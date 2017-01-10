@@ -57,7 +57,7 @@ void setMicOff();
 
 #define PULSE_WIDTH 8
 extern volatile int16_t holdoff;
-extern uint8_t outColor[3];
+//extern uint8_t outColor[3];
 extern volatile uint8_t wake;
 
 extern volatile uint8_t progDir;

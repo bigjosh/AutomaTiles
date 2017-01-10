@@ -22,11 +22,13 @@ struct Fading {
 	hsv fromHSV;
 	hsv currHSV;
 	hsv toHSV;
-	uint16_t fadeCntr;
-	hsv inc;
+	uint16_t fadeCntr;	// Counter used to end the fade transitions
+	uint8_t inc;	// Hue increment per transition
 	bool positiveIncrement;
 	int16_t error;	// Bressenham algorithm error to enable up to 32768ms delays
-	uint16_t dh, dt;	// hue differential, time diferential
+	uint16_t dh;	// hue differential and time differential
+	uint16_t dt;	// time differential is the amound of discrete time steps per fade transition
+					// or the number of times that the LED will be refreshed for this transition
 } fading;
 
 struct Blinking {
@@ -63,21 +65,15 @@ void fadeTo(const uint8_t r, const uint8_t g, const uint8_t b, const uint16_t ms
 	fading.currHSV = fading.fromHSV;
 	fading.toHSV = rgb2hsv(toRGB);
 
-	printf("Fade from h = %d, s=%d, v= %d\n", wheelTo360(fading.currHSV.h), fading.currHSV.s, fading.currHSV.v);
-	printf("Fade to h = %d, s=%d, v= %d\n", wheelTo360(fading.toHSV.h), fading.toHSV.s, fading.toHSV.v);
+	//printf("Fade from h = %d, s=%d, v= %d\n", wheelTo360(fading.currHSV.h), fading.currHSV.s, fading.currHSV.v);
+	//printf("Fade to h = %d, s=%d, v= %d\n", wheelTo360(fading.toHSV.h), fading.toHSV.s, fading.toHSV.v);
 
 	fading.dt = ms/LED_REFRESHING_PERIOD;
 	fading.fadeCntr = fading.dt;
 	printf("Led Updates Per Period = %d\n", fading.fadeCntr);
 	fading.error = 0;
-	fading.dh = abs(fading.fromHSV.h - fading.toHSV.h);
-	uint8_t saturationDiff = abs(fading.fromHSV.s - fading.toHSV.s);
-	uint8_t valueDiff = abs(fading.fromHSV.v - fading.toHSV.v);
-	// deciding Fade HUE direction (the shortest)
 
-	// Fixing precision lost by rounding to integers; TODO improve method, has same rounding issue
-	//fading.inc.h = hueDiff % fading.inc.h; //
-	//fading.incCorrCntr = fading.inc. % fading.fadeCrr;
+	fading.dh = abs(fading.fromHSV.h - fading.toHSV.h);
 
 	// Looking for the fastest route to reach the next Color
 	// if the increment is smaller than 180, that meeans that the shortest route is within a full circle (0 to 360 hue degrees)
@@ -97,12 +93,10 @@ void fadeTo(const uint8_t r, const uint8_t g, const uint8_t b, const uint16_t ms
 		// adjust increment for transitions that overflow the wheel
 		fading.dh = wheel(360) - fading.dh;
 	}
-	fading.inc.h = fading.dh / fading.fadeCntr;
-	fading.inc.s = saturationDiff / fading.fadeCntr;
-	fading.inc.v = valueDiff / fading.fadeCntr;
+	fading.inc = fading.dh / fading.fadeCntr;
 
-	printf("Hue Diff = %d, SaturationDiff = %d, valueDiff = %d\n", wheelTo360(fading.dh), saturationDiff, valueDiff);	
-	printf("Hue Increment = %d\n", wheelTo360(fading.inc.h));
+	printf("Hue Diff = %d\n", wheelTo360(fading.dh));	
+	printf("Hue Increment = %d\n", wheelTo360(fading.inc));
 	printf("Positive increment? %d\n", fading.positiveIncrement);
 }
 
@@ -122,49 +116,45 @@ void fadeUpdate(void) {
 	if (fading.fadeCntr--) {
 		if (fading.positiveIncrement) {  // Positive increment moving clockwise along the Hue wheel
 			// Detect and correct an color overflow hue value situation 
-			if ((fading.currHSV.h + fading.inc.h) >= wheel(360)) {
-				fading.currHSV.h = fading.currHSV.h + fading.inc.h - wheel(360);
+			if ((fading.currHSV.h + fading.inc) >= wheel(360)) {
+				fading.currHSV.h = fading.currHSV.h + fading.inc - wheel(360);
 			} else {
-				fading.currHSV.h += fading.inc.h;  // Increment current Hue value				
+				fading.currHSV.h += fading.inc;  // Increment current Hue value				
 				// Discretization double to int correction
-				// This solves casting and rounding issues using uint8_t. Lightly inspired in Bressenham's algorithms
-				// We look at the current value using rounded increment, and compared to the same equivalent increment from our 
-				// target hue value, if smaller increment by 1
-				if (!fading.inc.h) { // Increment equal to 0
+				// This solves casting and rounding issues using uint8_t.Based on Bressenham's algorithm
+				if (!fading.inc) { // Increment equal to 0
+					// Bressenham's algorithm, incremental scan conversion algorithm
 				 	fading.error += 2*fading.dh;
-				 	if (fading.error > fading.dt)	{
+				 	if (fading.error > fading.dt) {
 				 		fading.currHSV.h++;
 				 		fading.error-= 2* fading.dt;	
 				 	}
-				 } else if (fading.currHSV.h < (fading.toHSV.h - fading.fadeCntr * fading.inc.h)){
+				// We look at the current value using rounded increment, and compared to the same equivalent increment from our 
+				// target hue value, if smaller increment by 1.
+				 } else if (fading.currHSV.h < (fading.toHSV.h - fading.fadeCntr * fading.inc)){
 					fading.currHSV.h++;
 				}
 			}
-			// Decrease saturation and value
-			fading.currHSV.s += fading.inc.s;
-			fading.currHSV.v += fading.inc.v;
 		} else { // Negative increment moving counterclockwise along the Hue wheel
 			// Detect and correct negative overflows for hue values
-			if ((fading.currHSV.h - fading.inc.h) <= 0) {
-				fading.currHSV.h = fading.currHSV.h - fading.inc.h + wheel(360);
+			if ((fading.currHSV.h - fading.inc) <= 0) {
+				fading.currHSV.h = fading.currHSV.h - fading.inc + wheel(360);
 			} else {
-				fading.currHSV.h -= fading.inc.h;
-				// Discretization double to int	correction
-				if (!fading.inc.h) { // Increment equal to 0
+				fading.currHSV.h -= fading.inc;
+				// This solves casting and rounding issues using uint8_t.Based on Bressenham's algorithm
+				if (!fading.inc) { // Increment equal to 0
+					// Bressenham's algorithm
 				 	fading.error += 2*fading.dh;
 				 	if (fading.error > fading.dt)	{
 				 		fading.currHSV.h--;
 				 		fading.error-= 2* fading.dt;	
 				 	}		 	
-				} else if(fading.currHSV.h > ( (fading.toHSV.h + fading.fadeCntr * fading.inc.h) % wheel(360) ) ){
+				} else if(fading.currHSV.h > ( (fading.toHSV.h + fading.fadeCntr * fading.inc) % wheel(360) ) ){
 					fading.currHSV.h--;
 				}
 			}
-			// Decrease saturation and value			
-			fading.currHSV.s -= fading.inc.s;
-			fading.currHSV.v -= fading.inc.v;
 		}
-		printf("Hue = %d, Saturation = %d, Value = %d \n", wheelTo360(fading.currHSV.h), fading.currHSV.s, fading.currHSV.v); 
+		//printf("Hue = %d, Saturation = %d, Value = %d \n", wheelTo360(fading.currHSV.h), fading.currHSV.s, fading.currHSV.v); 
 	} else {  // End of the fade to transition, return to send colors
 		ledMode = stillMode;
 		//printf("Fade ending :)\n");

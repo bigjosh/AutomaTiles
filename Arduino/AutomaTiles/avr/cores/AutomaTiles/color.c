@@ -1,170 +1,98 @@
 /*
- * Color RGB to/from HSV function definition from ColorGossip.ino
+ * Color RGB to/from HSV
  */
 
 #include "color.h"
 
-hsv rgb2hsv(rgb in){
-    hsv         out;
-    double      min, max, delta;
+rgb hsv2rgb(hsv in){
+    rgb out;
+    uint8_t region, p, q, t;
+    uint16_t h, s, v, remainder;
 
-    min = in.r < in.g ? in.r : in.g;
-    min = min  < in.b ? min  : in.b;
-
-    max = in.r > in.g ? in.r : in.g;
-    max = max  > in.b ? max  : in.b;
-
-    out.v = max;                                // v
-    delta = max - min;
-    if (delta < 0.00001)
-    {
-        out.s = 0;
-        out.h = 0; // undefined, maybe nan?
+    if (in.s == 0) {
+        out.r = in.v;
+        out.g = in.v;
+        out.b = in.v;
         return out;
     }
-    if( max > 0.0 ) { // NOTE: if Max is == 0, this divide would cause a crash
-        out.s = (delta / max);                  // s
-    } else {
-        // if max is 0, then r = g = b = 0              
-            // s = 0, v is undefined
-        out.s = 0.0;
-        out.h = 0.0;                            // its now undefined
-        return out;
+
+    // 2* to transform our hue range from 127 to 255
+    // converting to 16 bit to prevent overflow
+    h = 2*in.h;
+    s = in.s;
+    v = in.v;
+    // in what region of the hue wheel this color is (there are 6 regions red, yellow, green, cyan, blue, and magenta)
+    // since our value goes from 0 to 255, each reason will be equal 255/6=43
+    // https://en.wikipedia.org/wiki/HSL_and_HSV#Hue_and_chroma
+    region = (uint8_t)(h) / 43;
+    remainder = (h - (region * 43)) * 6; 
+
+    p = (v * (255 - s)) >> 8;
+    q = (v * (255 - ((s * remainder) >> 8))) >> 8;
+    t = (v * (255 - ((s * (255 - remainder)) >> 8))) >> 8;
+
+    // printf("region = %d, remainder = %d\n", region, remainder);
+    // printf("p = %d, q = %d, t = %d \n", p, q, t);
+
+    switch (region) {
+        case 0:
+            out.r = v; out.g = t; out.b = p;
+            break;
+        case 1:
+            out.r = q; out.g = v; out.b = p;
+            break;
+        case 2:
+            out.r = p; out.g = v; out.b = t;
+            break;
+        case 3:
+            out.r = p; out.g = q; out.b = v;
+            break;
+        case 4:
+            out.r = t; out.g = p; out.b = v;
+            break;
+        default:
+            out.r = v; out.g = p; out.b = q;
+            break;
     }
-    if( in.r >= max )                           // > is bogus, just keeps compilor happy
-        out.h = ( in.g - in.b ) / delta;        // between yellow & magenta
-    else
-    if( in.g >= max )
-        out.h = 2.0 + ( in.b - in.r ) / delta;  // between cyan & yellow
-    else
-        out.h = 4.0 + ( in.r - in.g ) / delta;  // between magenta & cyan
-
-    out.h *= 60.0;                              // degrees
-
-    if( out.h < 0.0 )
-        out.h += 360.0;
 
     return out;
 }
 
+hsv rgb2hsv(rgb in) {
+    hsv out;
+    uint8_t rgbMin, rgbMax;
+    rgbMax = max(max(in.r, in.g), in.b);
+    rgbMin = min(min(in.r, in.g), in.b);
+    //printf("rgbMin = %d, rgbMax = %d\n", rgbMin, rgbMax);
 
-rgb hsv2rgb(hsv in){
-    double      hh, p, q, t, ff;
-    long        i;
-    rgb         out;
-
-    if(in.s <= 0.0) {       // < is bogus, just shuts up warnings
-        out.r = in.v;
-        out.g = in.v;
-        out.b = in.v;
+    out.v = rgbMax;
+    if (out.v == 0) {
+        out.h = 0;
+        out.s = 0;
         return out;
     }
-    hh = in.h;
-    if(hh >= 360.0) hh = 0.0;
-    hh /= 60.0;
-    i = (long)hh;
-    ff = hh - i;
-    p = in.v * (1.0 - in.s);
-    q = in.v * (1.0 - (in.s * ff));
-    t = in.v * (1.0 - (in.s * (1.0 - ff)));
 
-    switch(i) {
-    case 0:
-        out.r = in.v;
-        out.g = t;
-        out.b = p;
-        break;
-    case 1:
-        out.r = q;
-        out.g = in.v;
-        out.b = p;
-        break;
-    case 2:
-        out.r = p;
-        out.g = in.v;
-        out.b = t;
-        break;
-
-    case 3:
-        out.r = p;
-        out.g = q;
-        out.b = in.v;
-        break;
-    case 4:
-        out.r = t;
-        out.g = p;
-        out.b = in.v;
-        break;
-    case 5:
-    default:
-        out.r = in.v;
-        out.g = p;
-        out.b = q;
-        break;
+    out.s = 255 * (long)(rgbMax - rgbMin) / out.v;
+    if (out.s == 0) {
+        out.h = 0;
+        return out;
     }
-    return out;     
-}
-
-void interpolateRGBColor(uint8_t *result, uint8_t from[3], uint8_t to[3], float percent) {
-  // first convert colors to HSV
-  hsv fromHSV = getHSVfromRGB(from);
-  hsv toHSV = getHSVfromRGB(to);
-  // tween between HSV values
-  hsv resultHSV;
-  //Determine quickest route to color
-  if(abs(fromHSV.h - toHSV.h) <= 180.0) {
-    // straight shot, just lerp to the color
-    resultHSV.h = fromHSV.h * (1.0 - percent) + toHSV.h * percent;
-  }
-  else {
-    // quickest way is to go around, like a clock
-    double first, second, total;
-    if(fromHSV.h > toHSV.h) {
-      // hue path illustration: |>>second>>*-------------*>>first>>|
-      first = 360.0 - fromHSV.h;
-      second = toHSV.h;
-      total = first + second;
-
-      if(percent < first/total) {
-        resultHSV.h = fromHSV.h + (percent * total);
-      }
-      else {
-        resultHSV.h = toHSV.h + ((percent - 1.0) * total);
-      }
+    // 0, 43, 86, 23 are the equivalent values to hue values formulas using a wheel of 127 values
+    // http://www.rapidtables.com/convert/color/rgb-to-hsv.htm
+    if (rgbMax == in.r) {
+        out.h = 0 + 23 * (in.g - in.b) / (rgbMax - rgbMin);
+        //printf("(out.g - out.b) / (rgbMax - rgbMin) %d\n", (out.g - out.b) / (rgbMax - rgbMin));
+    } else if (rgbMax == in.g) {
+        out.h = 43 + 23 * (in.b - in.r) / (rgbMax - rgbMin);
+    } else {
+        out.h = 86 + 23 * (in.r - in.g) / (rgbMax - rgbMin);
     }
-    else {
-      // hue path illustration: |<<first<<*-------------*<<second<<|
-      first = fromHSV.h;
-      second = 360.0 - toHSV.h;
-      total = first + second;
 
-      if(percent < first/total) {
-        resultHSV.h = fromHSV.h - (percent * total);
-      }
-      else {
-        resultHSV.h = toHSV.h + ((percent - 1.0) * total);
-      }
+    // if hue value is negative add a complete hue wheel turn (in our case 127)
+    if (out.h < 0) {
+      out.h += 127;
     }
-  }
-  
-  resultHSV.h = fromHSV.h * (1.0 - percent) + toHSV.h * percent;
-  resultHSV.s = fromHSV.s * (1.0 - percent) + toHSV.s * percent;
-  resultHSV.v = fromHSV.v * (1.0 - percent) + toHSV.v * percent;
-  getRGBfromHSV(result, resultHSV);
+    
+    return out;
 }
 
-void getRGBfromHSV(uint8_t *result, hsv hsvColor) {
-  rgb convertedColor;
-  convertedColor = hsv2rgb(hsvColor);
-  result[0] = (uint8_t)(convertedColor.r * 255.0);
-  result[1] = (uint8_t)(convertedColor.g * 255.0);
-  result[2] = (uint8_t)(convertedColor.b * 255.0);
-}
-
-hsv getHSVfromRGB(uint8_t rgbColor[3]) {
-  rgb toConvert;
-  toConvert.r = rgbColor[0] / 255.0;
-  toConvert.g = rgbColor[1] / 255.0;
-  toConvert.b = rgbColor[2] / 255.0;
-  return rgb2hsv(toConvert);
-}
