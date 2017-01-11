@@ -130,6 +130,18 @@ static void parseBuffer();
 #define TEST_TIMER_GT(us)  ( ((uint8_t) TIMER1_VAL) > ( ((uint8_t) us)/8U)  )       // macro because of all the unsigned casts
 
 
+// Map the faces 1-6 (represented by blink flashes) to the PORT bit they are each connected to
+
+const uint8_t modeToPin[] = {
+    0,          // TX
+    _BV(PA1),  
+    _BV(PA2),
+    _BV(PA5),
+    _BV(PA4),
+    _BV(PA3),
+    _BV(PA0),
+    };
+
 void testMode(void) {
 
     // wait for a low to sync on
@@ -211,7 +223,7 @@ void testMode(void) {
             
         } else {
             
-            uint8_t photomask = 1<<(mode-1);
+            uint8_t photomask = modeToPin[mode];
             
         
             uint8_t newState = (PINA & photomask);            //1=SIGNAL, 0=Dark
