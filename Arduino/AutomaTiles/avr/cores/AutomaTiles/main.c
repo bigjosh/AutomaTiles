@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include "APA102C.h"
 
-uint32_t timer;
+uint32_t prevTimer;
 const uint8_t black[3] = {0x00, 0x00, 0x00};
 const uint8_t transmitColor[3] = {0xff, 0x55, 0x00};
 const uint8_t recieveColor[3] = {0x00, 0xff, 0x55};
@@ -14,23 +14,24 @@ int main(void) {
 	
 	setup();
 	
-	timer = getTimer();
+	prevTimer = getTimer();
 	while(1){
 		if(mode == running){
-			uint32_t diff = getTimer()-timer;
+			// Difference between current time and last time the LED was updated
+			uint32_t diff = getTimer()-prevTimer;
 			if(holdoff<diff){
 				holdoff = 0;
 			}else{
 				holdoff -= diff;
 			}
-			uint8_t t = timer%64;
+			uint8_t t = prevTimer%64;
 			if(t<=32 && t+diff>=32){
-				sendColor(LEDCLK, LEDDAT,outColor);
+				updateLed();
 			}
-			timer = getTimer();
+			prevTimer = getTimer();
 			
 			if(timeout>0){
-				if(timer-sleepTimer>1000*timeout){
+				if(prevTimer-sleepTimer>1000*timeout){
 					mode = sleep;
 					disAD();
 					DDRB &= ~IR;//Set direction in
@@ -42,7 +43,7 @@ int main(void) {
 			}
 			
 			loop();
-		}else if(mode==recieving){
+		}else if(mode==recieving){ /*
 			//disable A/D
 			disAD();
 			//set photo transistor interrupt to only trigger on specific direction
@@ -53,11 +54,11 @@ int main(void) {
 			modeStart = getTimer();
 			while(mode==recieving){//stay in this mode until instructed to leave or timeout
 				uint32_t diff = getTimer()-modeStart;
-				if(diff>20*PULSE_WIDTH){//Been too long without any new data
+				if(diff>20*PULSE_WIDTH){//Been too long without any new data*/
 					mode = transmitting;					
-				}
-			}
-		}else if(mode==transmitting){
+				//}
+			//}
+		}else if(mode==transmitting){/*
 			//disable Phototransistor Interrupt
 			setDirNone();
 			//set LED to output
@@ -118,10 +119,9 @@ int main(void) {
 			enAD();
 			//re-enable all phototransistors
 			setDirAll();
-			setState(0);
+			setState(0);*/
 			
 			mode = running;
-
 		}
 	}
 }

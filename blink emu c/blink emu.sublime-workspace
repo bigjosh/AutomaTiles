@@ -1,0 +1,655 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"vale",
+				"valueDiff"
+			],
+			[
+				"fade",
+				"fadeCntr"
+			],
+			[
+				"hue",
+				"hueDiff"
+			],
+			[
+				"whee",
+				"wheelTo360"
+			],
+			[
+				"whe",
+				"wheelTo360"
+			],
+			[
+				"ui",
+				"uint8_t"
+			],
+			[
+				"po",
+				"positiveIncrement"
+			],
+			[
+				"crr",
+				"currHSV"
+			],
+			[
+				"hs",
+				"currHSV"
+			],
+			[
+				"blin",
+				"blinkUpdate"
+			],
+			[
+				"hsv",
+				"currHSV"
+			],
+			[
+				"inc",
+				"inc\t#include \"…\""
+			],
+			[
+				"rg",
+				"rgb2hsv"
+			],
+			[
+				"to",
+				"totalErr"
+			],
+			[
+				"b",
+				"bErr"
+			],
+			[
+				"g",
+				"gErr"
+			],
+			[
+				"hsvT",
+				"hsvToRgb"
+			],
+			[
+				"hvste",
+				"hsvTestINT2"
+			],
+			[
+				"rgv",
+				"rgbToHsv"
+			],
+			[
+				"ALL",
+				"allColorsHSVtoRGBTest"
+			],
+			[
+				"rgb",
+				"rgbMax"
+			],
+			[
+				"pin",
+				"printf\tprintf …"
+			],
+			[
+				"uin",
+				"uint8_t"
+			],
+			[
+				"LED",
+				"LEDCLK"
+			],
+			[
+				"send",
+				"sendColor"
+			],
+			[
+				"fad",
+				"fading"
+			],
+			[
+				"de",
+				"define"
+			],
+			[
+				"led",
+				"ledUpdatesPerPeriod"
+			],
+			[
+				"le",
+				"ledUpdatesPerPeriod"
+			],
+			[
+				"ma",
+				"max"
+			],
+			[
+				"increme",
+				"increment"
+			],
+			[
+				"ra",
+				"rampUp"
+			],
+			[
+				"incre",
+				"increment"
+			],
+			[
+				"per",
+				"period"
+			],
+			[
+				"bl",
+				"blinkingPeriod"
+			],
+			[
+				"bln",
+				"blinkingTime"
+			],
+			[
+				"blink",
+				"blinkingPeriod"
+			],
+			[
+				"from",
+				"fromHSV"
+			],
+			[
+				"setC",
+				"setColorRGB"
+			],
+			[
+				"uint",
+				"uint16_t"
+			],
+			[
+				"next",
+				"nextHSV"
+			],
+			[
+				"curr",
+				"currHSV"
+			],
+			[
+				"out",
+				"outColor"
+			],
+			[
+				"co",
+				"color"
+			],
+			[
+				"arti",
+				"article"
+			],
+			[
+				"par",
+				"params"
+			],
+			[
+				"n",
+				"new"
+			],
+			[
+				"article",
+				"article_params"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "blink.c",
+			"settings":
+			{
+				"buffer_size": 9129,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "blink.h",
+			"settings":
+			{
+				"buffer_size": 1263,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "color.c",
+			"settings":
+			{
+				"buffer_size": 2634,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "color.h",
+			"settings":
+			{
+				"buffer_size": 1053,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "main.c",
+			"settings":
+			{
+				"buffer_size": 826,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 150.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/D/Curro/Move38/AutomaTiles/Examples/ColorGossip/color.h",
+		"/D/Curro/Move38/AutomaTiles/Examples/ColorGossip/ColorGossip.ino",
+		"/D/Curro/Move38/AutomaTiles/Color Conversions/color.c",
+		"/D/Curro/Move38/AutomaTiles/Color Conversions/color.h",
+		"/D/Curro/Move38/AutomaTiles/Color Conversions/main.c",
+		"/D/Curro/Move38/AutomaTiles/Color Conversions/ncurses.c",
+		"/D/Curro/Move38/C tests/Color Transformations/color.h",
+		"/D/Curro/Move38/C tests/Color Transformations/color.c",
+		"/D/Curro/Move38/C tests/Color Transformations/main.c",
+		"/D/Curro/Move38/blink emu c/color.h",
+		"/D/Curro/Move38/blink emu c/main.c",
+		"/D/Curro/Move38/blink emu c/blink.h",
+		"/D/Curro/Move38/blink emu c/blink.c",
+		"/D/Curro/Move38/AutomaTiles/Arduino/AutomaTiles/avr/cores/AutomaTiles/AutomaTiles.c",
+		"/D/Curro/Move38/blink emu c/color.c",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/cores/AutomaTiles/main.c",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/cores/AutomaTiles/AutomaTiles.h",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/cores/AutomaTiles/AutomaTiles.c",
+		"/D/Curro/Move38/C tests/trans.c",
+		"/D/Curro/Move38/AutomaTiles/Arduino/AutomaTiles/avr/cores/AutomaTiles/Arduino.h",
+		"/D/Curro/Move38/C tests/hello.c",
+		"/D/Curro/Move38/C tests/color.c",
+		"/D/Curro/Move38/C tests/color.h",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/cores/AutomaTiles/color.c",
+		"/D/Curro/Move38/AutomaTiles/Arduino/AutomaTiles/avr/cores/AutomaTiles/main.c",
+		"/G/NM/Emulador/firmware_foodini/firmware/src/main.c",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/platform.txt",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/cores/AutomaTiles/APA102C.h",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/cores/AutomaTiles/APA102C.c",
+		"/G/NM/Emulador/firmware_foodini/firmware/src/emulator.c",
+		"/D/SW/cmder/vendor/init.bat",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/cores/AutomaTiles/Arduino.h",
+		"/G/NM/Emulador/firmware_foodini/firmware/src/draw.sh",
+		"/D/Curro/Move38/C tests/hello workd",
+		"/C/Users/Luis Rodriguez/Documents/Arduino/hardware/AutomaTiles/avr/boards.txt",
+		"/D/Curro/Move38/AutomaTiles/Arduino/AutomaTiles/avr/cores/AutomaTiles/color.c",
+		"/D/Curro/Move38/AutomaTiles/Arduino/AutomaTiles/avr/cores/AutomaTiles/color.h",
+		"/D/Curro/Move38/AutomaTiles/Arduino/AutomaTiles/avr/cores/AutomaTiles/AutomaTiles.h",
+		"/D/Curro/Move38/AutomaTiles/Arduino/AutomaTiles/avr/cores/AutomaTiles/APA102C.h",
+		"/D/Curro/Move38/AutomaTiles/Arduino/AutomaTiles/avr/cores/AutomaTiles/APA102C.c",
+		"/D/3DC/WEBS/blog/app/views/welcome/index.html.erb",
+		"/D/3DC/WEBS/blog/app/views/articles/new.html.erb",
+		"/D/3DC/WEBS/blog/app/views/articles/show.html.erb",
+		"/D/3DC/WEBS/blog/app/views/comments/_comment.html.erb",
+		"/D/3DC/WEBS/blog/app/views/comments/_form.html.erb",
+		"/D/3DC/WEBS/blog/app/controllers/comments_controller.rb",
+		"/D/Jisuna/WEB/helloworld.html",
+		"/D/3DC/WEBS/blog/app/controllers/articles_controller.rb",
+		"/D/3DC/WEBS/blog/app/models/article.rb",
+		"/E/Source/Smoothieware-edge/win_install.cmd",
+		"/D/3DC/WEBS/blog/app/views/articles/edit.html.erb",
+		"/D/3DC/WEBS/blog/app/views/articles/index.html.erb",
+		"/D/3DC/WEBS/blog/config/routes.rb",
+		"/D/3DC/WEBS/blog/app/views/articles/_comment.html.erb",
+		"/D/3DC/WEBS/blog/Gemfile",
+		"/D/3DC/WEBS/blog/app/views/articles/_form.html.erb",
+		"/D/3DC/WEBS/blog/db/migrate/20161109025300_create_articles.rb",
+		"/D/3DC/WEBS/blog/app/views/layouts/application.html.erb",
+		"/D/3DC/May/WS/Color towers/0612_3extruders.gcode",
+		"/D/3DC/May/WS/Meringue/Tringle 35x20.gcode",
+		"/E/config",
+		"/E/AAA- WS/Lucky hummus/turtle trebol.gcode",
+		"/E/config-override",
+		"/E/WS/Hexagon.gcode",
+		"/E/WS/tower colors 2 layers.gcode",
+		"/E/WS/tower not edited.gcode",
+		"/D/TheCrated/May/Atiny10/Code/Hello World/Hello World/Debug/Hello World.hex",
+		"/C/Users/Luis Rodriguez/Desktop/Hola Jisuna!!!",
+		"/D/TheCrated/May/Atiny10/Code/Assembler Hello World/Assembler Hello World/Debug/Assembler Hello World.hex",
+		"/C/Users/Luis Rodriguez/Documents/Atmel Studio/7.0/GccApplication1/GccApplication1/Debug/GccApplication1.hex",
+		"/F/config-override"
+	],
+	"find":
+	{
+		"height": 27.0
+	},
+	"find_in_files":
+	{
+		"height": 117.0,
+		"where_history":
+		[
+			"<current file>",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"double",
+			"inc.g",
+			"hueIncrement",
+			"delay",
+			"main",
+			"timer",
+			"delay",
+			"rgb.",
+			"hsv.",
+			"uint8_t",
+			"5",
+			"abs",
+			"EMULATOR",
+			"path",
+			"timer",
+			"toHSV",
+			"sendColor",
+			"wakeColor",
+			"sendColor",
+			"dela",
+			"recipe.ar.pattern=\"{compiler.path}{compiler.ar.cmd}\" {compiler.ar.flags} \"{build.path}/{archive_file}\" \"{object_file}\",",
+			"bool",
+			"F1200",
+			"home",
+			"height",
+			"z",
+			"13",
+			"resolution",
+			"led"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"inc.h",
+			"inc.g",
+			"out.",
+			"prevTimer"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "blink.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9129,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6603,
+								6707
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3489.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "blink.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1263,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								358,
+								257
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "color.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2634,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "color.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1053,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								547,
+								547
+							],
+							[
+								549,
+								549
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "main.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 826,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								430,
+								430
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 26.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "blink emu.sublime-project",
+	"replace":
+	{
+		"height": 50.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 188.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
